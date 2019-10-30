@@ -16,8 +16,7 @@ const {
   slack,
   webhookURL,
   token,
-  selfEmail,
-  codes
+  selfEmail
 } = require('./constants')
 
 app.use(bodyParser.json())
@@ -156,7 +155,7 @@ app.get('/verify/:base64', (request, response, next) => {
 // Add the member as per their email id
 const addMember = data => {
   const { email, username } = data
-  const regex = /^20\d{7}@iiitv(adodara)?.ac.in$/; // eslint-disable-line
+  const regex = new RegExp(process.env.MAIL_REGEX)
   const promise = new Promise((resolve, reject) => {
     let pref = 'outsiders'
     if (regex.test(email)) {
@@ -164,7 +163,7 @@ const addMember = data => {
       console.log('IIITian')
     }
     console.log(pref)
-    const url = `https://api.github.com/teams/${codes[pref]}/memberships/${username}?access_token=${token}`
+    const url = `https://api.github.com/orgs/${process.env.GITHUB_ORGS_NAME}/memberships/${username}?access_token=${token}`
     console.log(url)
 
     axios
@@ -180,6 +179,6 @@ const addMember = data => {
   return promise
 }
 
-const listener = app.listen(3000 || process.env.PORT, () => {
+const listener = app.listen(process.env.PORT || 8080, () => {
   console.log(`Your app is listening on port ${listener.address().port}`)
 })
